@@ -1,5 +1,8 @@
--- load ui from git
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Snxdfer/back-ups-for-libs/refs/heads/main/xsxLibrary.lua"))()
+-- load ui from local repo
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/fatality-win/hm/main/universal%20by%20me/xsxLibrary.lua"))()
+if not library then
+    error("Failed to load UI library. Check your internet or try again later.")
+end
 library.rank = "skeet.dev user"
 
 -- create watermark
