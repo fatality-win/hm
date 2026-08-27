@@ -1,8 +1,24 @@
--- load ui from local repo
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/fatality-win/hm/main/universal%20by%20me/xsxLibrary.lua"))()
-if not library then
-    error("Failed to load UI library. Check your internet or try again later.")
+-- load ui from git with multiple fallbacks
+local library = nil
+local libraryUrls = {
+    "https://raw.githubusercontent.com/fatality-win/hm/main/universal%20by%20me/xsxLibrary.lua",
+    "https://raw.githubusercontent.com/Snxdfer/back-ups-for-libs/refs/heads/main/xsxLibrary.lua"
+}
+
+for _, url in ipairs(libraryUrls) do
+    local success, result = pcall(function()
+        return loadstring(game:HttpGet(url))()
+    end)
+    if success and result then
+        library = result
+        break
+    end
 end
+
+if not library then
+    error("Failed to load UI library from all sources. Check your internet.")
+end
+
 library.rank = "skeet.dev user"
 
 -- create watermark
@@ -72,9 +88,34 @@ library.title = "skeet.dev"
 library:Introduction()
 local mainWindow = library:Init()
 
--- load gui
-local BASE_URL = "https://raw.githubusercontent.com/fatality-win/hm/main/"
-local guiBuilder = loadstring(game:HttpGet(BASE_URL .. "gui.lua"))()
+-- load gui (with fallback)
+local guiContent = nil
+local guiUrls = {
+    "https://raw.githubusercontent.com/fatality-win/hm/main/universal%20by%20me/gui.lua",
+    "https://raw.githubusercontent.com/fatality-win/hm/main/gui.lua"
+}
+
+for _, url in ipairs(guiUrls) do
+    local success, result = pcall(function()
+        return game:HttpGet(url)
+    end)
+    if success and result and result ~= "" then
+        guiContent = result
+        break
+    end
+end
+
+if not guiContent then
+    notifications:Notify("failed to load gui.lua", 3, "error")
+    return
+end
+
+local guiBuilder = loadstring(guiContent)()
+if not guiBuilder then
+    notifications:Notify("failed to compile gui.lua", 3, "error")
+    return
+end
+
 local tabs = guiBuilder(library, mainWindow, notifications)
 
 -- wait for game and player
@@ -99,7 +140,7 @@ _G.Modules = {}
 
 local function loadModule(path)
     local success, module = pcall(function()
-        return loadstring(game:HttpGet(BASE_URL .. path))()
+        return loadstring(game:HttpGet(path))()
     end)
     if not success then
         warn("[skeet.dev] failed to load " .. path .. ": " .. tostring(module))
@@ -109,14 +150,15 @@ local function loadModule(path)
     return module
 end
 
-_G.Modules.Combat = loadModule("Features/Combat.lua")
-_G.Modules.ESP = loadModule("Features/ESP.lua")
-_G.Modules.World = loadModule("Features/World.lua")
-_G.Modules.Anti = loadModule("Features/Anti.lua")
-_G.Modules.Misc = loadModule("Features/Misc.lua")
-_G.Modules.Scripts = loadModule("Features/Scripts.lua")
-_G.Modules.Config = loadModule("Features/Config.lua")
+-- base url for features
+local featureBase = "https://raw.githubusercontent.com/fatality-win/hm/main/universal%20by%20me/very%20cool%20features/"
+
+_G.Modules.Combat = loadModule(featureBase .. "Combat.lua")
+_G.Modules.ESP = loadModule(featureBase .. "ESP.lua")
+_G.Modules.World = loadModule(featureBase .. "World.lua")
+_G.Modules.Anti = loadModule(featureBase .. "Anti.lua")
+_G.Modules.Misc = loadModule(featureBase .. "Misc.lua")
+_G.Modules.Scripts = loadModule(featureBase .. "Scripts.lua")
+_G.Modules.Config = loadModule(featureBase .. "Config.lua")
 
 notifications:Notify("skeet.dev Loaded", 3, "success")
-
--- love yall btw
