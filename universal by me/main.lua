@@ -91,12 +91,12 @@ library.title = "skeet.dev"
 library:Introduction()
 local mainWindow = library:Init()
 
--- load gui
-local guiContent = pcall(function()
+-- load gui (fixed pcall usage)
+local successGui, guiContent = pcall(function()
     return game:HttpGet("https://raw.githubusercontent.com/fatality-win/hm/main/universal%20by%20me/gui.lua")
 end)
 
-if not guiContent or guiContent == "" then
+if not successGui or not guiContent or guiContent == "" then
     notifications:Notify("failed to load gui.lua", 3, "error")
     return
 end
