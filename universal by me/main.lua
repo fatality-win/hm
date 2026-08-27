@@ -92,7 +92,7 @@ library:Introduction()
 local mainWindow = library:Init()
 
 -- load gui
-local guiContent, guiErr = pcall(function()
+local guiContent = pcall(function()
     return game:HttpGet("https://raw.githubusercontent.com/fatality-win/hm/main/universal%20by%20me/gui.lua")
 end)
 
