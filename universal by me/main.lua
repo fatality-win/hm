@@ -1,22 +1,25 @@
--- load ui from git with multiple fallbacks
+-- load ui from git
 local library = nil
-local libraryUrls = {
-    "https://raw.githubusercontent.com/fatality-win/hm/main/universal%20by%20me/xsxLibrary.lua",
-    "https://raw.githubusercontent.com/Snxdfer/back-ups-for-libs/refs/heads/main/xsxLibrary.lua"
-}
 
-for _, url in ipairs(libraryUrls) do
-    local success, result = pcall(function()
-        return loadstring(game:HttpGet(url))()
+-- try your local copy first
+local success, lib = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/fatality-win/hm/main/universal%20by%20me/xsxLibrary.lua"))()
+end)
+
+if success and lib then
+    library = lib
+else
+    -- fallback to original source
+    local success2, lib2 = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/Snxdfer/back-ups-for-libs/refs/heads/main/xsxLibrary.lua"))()
     end)
-    if success and result then
-        library = result
-        break
+    if success2 and lib2 then
+        library = lib2
     end
 end
 
 if not library then
-    error("Failed to load UI library from all sources. Check your internet.")
+    error("failed to load UI library - check your internet and try again")
 end
 
 library.rank = "skeet.dev user"
@@ -88,24 +91,12 @@ library.title = "skeet.dev"
 library:Introduction()
 local mainWindow = library:Init()
 
--- load gui (with fallback)
-local guiContent = nil
-local guiUrls = {
-    "https://raw.githubusercontent.com/fatality-win/hm/main/universal%20by%20me/gui.lua",
-    "https://raw.githubusercontent.com/fatality-win/hm/main/gui.lua"
-}
+-- load gui
+local guiContent, guiErr = pcall(function()
+    return game:HttpGet("https://raw.githubusercontent.com/fatality-win/hm/main/universal%20by%20me/gui.lua")
+end)
 
-for _, url in ipairs(guiUrls) do
-    local success, result = pcall(function()
-        return game:HttpGet(url)
-    end)
-    if success and result and result ~= "" then
-        guiContent = result
-        break
-    end
-end
-
-if not guiContent then
+if not guiContent or guiContent == "" then
     notifications:Notify("failed to load gui.lua", 3, "error")
     return
 end
